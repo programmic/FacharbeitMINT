@@ -13,8 +13,8 @@ and omits many desirable features.
 # Standard library
 import random
 
-# Third-party libraries
 import numpy as np
+import pandas as pd
 
 # My help libarys
 from helpful_functions import * # usefull functions as dot products, or different activation functions
