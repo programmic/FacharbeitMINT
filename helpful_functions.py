@@ -318,5 +318,3 @@ def tanh(z):
 def tanh_prime(z):
     """Derivative of tanh function"""
     return 1.0 -  tanh(z) ** 2
-
-print (numba.__verion__)

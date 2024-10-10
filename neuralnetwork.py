@@ -178,5 +178,5 @@ net = Network([len(training_data[0][0]), 3, 1])
 
 # Example usage to test different activation functions
 print("train network...")
-net = Network([2, 3, 2, 1], activation='sigmoid')  # Can use 'relu', 'tanh', or 'leaky_relu'
+net = Network([2, 3, 2, 1], activation='relu')  # Can use 'sigmoid', 'relu', 'tanh', or 'leaky_relu'
 net.SGD(training_data, epochs=256, mini_batch_size=32, eta=0.01, test_data=test_data)
