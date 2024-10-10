@@ -1,6 +1,7 @@
 import colors as colors
 from colorsys import hsv_to_rgb
 from math import sqrt, acos, exp
+import pandas as pd
 
 clear = "\033c"
 
@@ -25,6 +26,23 @@ def readFile(pName: str, pNr: int, extension: str = ".txt") -> list[str]:
             if not i == "":
                 ausgabe.append(i)
     return ausgabe
+
+def load_csv_data(file_path):
+    # Read the CSV file
+    data = pd.read_csv(file_path)
+
+    # Convert DataFrame to a list of tuples (inputs, target)
+    # Assuming the last column is the target variable (label)
+    inputs = data.iloc[:, :-1].values  # All rows, all columns except the last
+    targets = data.iloc[:, -1].values   # All rows, last column
+
+    # Normalize the input values (e.g., scale to 0-1 for images)
+    inputs = inputs / 255.0  # Assuming pixel values are 0-255 for images
+
+    # Create a list of tuples for training/testing
+    data_tuples = [(input_row, target) for input_row, target in zip(inputs, targets)]
+    
+    return data_tuples
 
 def lenformat( pInput: str | int, pDesiredLength: int, character: str = " ", place: str = "back" ) -> int:
     """
@@ -141,9 +159,6 @@ def intersectsLineVec(
         dir : tuple [ float, float ]
         ) -> bool:
     pass
-
-
-
 
 def dot2(vector1, vector2):
     """
