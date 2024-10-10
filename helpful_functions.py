@@ -1,6 +1,7 @@
 import colors as colors
 from colorsys import hsv_to_rgb
 from math import sqrt, acos, exp
+import csv
 
 clear = "\033c"
 
@@ -25,6 +26,21 @@ def readFile(pName: str, pNr: int, extension: str = ".txt") -> list[str]:
             if not i == "":
                 ausgabe.append(i)
     return ausgabe
+
+def load_csv_data(filename):
+    """ Load CSV file and return the data as lists of input-output pairs. """
+    data = []
+    with open(filename, 'r') as file:
+        reader = csv.reader(file)
+        next(reader)  # Skip the header if there is one
+        for row in reader:
+            # Assume last column is the output, and the rest are inputs
+            inputs = [float(x) for x in row[:-1]]
+            output = [float(row[-1])]  # Output is a single value
+            data.append((inputs, output))
+    return data
+
+
 
 def lenformat( pInput: str | int, pDesiredLength: int, character: str = " ", place: str = "back" ) -> int:
     """
@@ -143,7 +159,8 @@ def intersectsLineVec(
     pass
 
 
-
+def dot(vector1, vector2):
+    return sum(  x*y for x,y in zip(vector1, vector2) )
 
 def dot2(vector1, vector2):
     """
@@ -267,13 +284,11 @@ def transpose(matrix):
     """Transposes a matrix (list of lists)"""
     return list(map(list, zip(*matrix)))
 
-
-
 #### Activation functions
 
 def sigmoid(z):
     """Sigmoid activation function"""
-    return 1.0 / (1.0 + math.exp(-z))
+    return 1.0 / (1.0 + exp(-z))
 
 def sigmoid_prime(z):
     """Derivative of sigmoid function"""
@@ -297,8 +312,8 @@ def leaky_relu_prime(z, alpha=0.01):
 
 def tanh(z):
     """Tanh activation function"""
-    return math.tanh(z)
+    return tanh(z)
 
 def tanh_prime(z):
     """Derivative of tanh function"""
-    return 1.0 - math.tanh(z) ** 2
+    return 1.0 -  tanh(z) ** 2
