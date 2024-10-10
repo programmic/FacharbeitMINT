@@ -147,19 +147,16 @@ def intersectsLineVec(
 
 def dot2(vector1, vector2):
     """
-    Calculate the dot product of two 2D vectors.
+    Calculate the dot product of two vectors.
     
     Parameters:
-    vector1: list or tuple of 2 elements (x1, y1)
-    vector2: list or tuple of 2 elements (x2, y2)
+    vector1: list or tuple
+    vector2: list or tuple
     
     Returns:
     The dot product of the two vectors.
     """
-    if len(vector1) != 2 or len(vector2) != 2:
-        raise ValueError("Both vectors must have exactly 2 elements.")
-    
-    return vector1[0] * vector2[0] + vector1[1] * vector2[1]
+    return sum(x * y for x, y in zip(vector1, vector2))
 
 def dot3(vector1, vector2):
     """
@@ -253,10 +250,55 @@ def vec3angleRad(vector1, vector2):
     
     return angle_radians
 
+
+def scalar_vector_mult(scalar, vec):
+    """Multiplies a scalar by a vector"""
+    return [scalar * x for x in vec]
+
+def vector_add(vec1, vec2):
+    """Adds two vectors element-wise"""
+    return [x + y for x, y in zip(vec1, vec2)]
+
+def vector_subtract(vec1, vec2):
+    """Subtracts vec2 from vec1 element-wise"""
+    return [x - y for x, y in zip(vec1, vec2)]
+
+def transpose(matrix):
+    """Transposes a matrix (list of lists)"""
+    return list(map(list, zip(*matrix)))
+
+
+
+#### Activation functions
+
 def sigmoid(z):
-    """The sigmoid function."""
-    return 1 / ( 1 + exp( -z ) )
+    """Sigmoid activation function"""
+    return 1.0 / (1.0 + math.exp(-z))
 
 def sigmoid_prime(z):
-    """Derivative of the sigmoid function."""
-    return sigmoid ( z ) * ( 1 - sigmoid ( z ) )
+    """Derivative of sigmoid function"""
+    return sigmoid(z) * (1 - sigmoid(z))
+
+def relu(z):
+    """ReLU activation function"""
+    return max(0, z)
+
+def relu_prime(z):
+    """Derivative of ReLU function"""
+    return 1 if z > 0 else 0
+
+def leaky_relu(z, alpha=0.01):
+    """Leaky ReLU activation function"""
+    return z if z > 0 else alpha * z
+
+def leaky_relu_prime(z, alpha=0.01):
+    """Derivative of Leaky ReLU function"""
+    return 1 if z > 0 else alpha
+
+def tanh(z):
+    """Tanh activation function"""
+    return math.tanh(z)
+
+def tanh_prime(z):
+    """Derivative of tanh function"""
+    return 1.0 - math.tanh(z) ** 2

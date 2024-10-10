@@ -17,12 +17,12 @@ import numpy as np
 import pandas as pd
 
 # My help libarys
-from helpful_functions import * # usefull functions as dot products, or different activation functions
+import helpful_functions as hlp # usefull functions as dot products, or different activation functions
 import colors # colors for terminal output
 
 class Network(object):
 
-    def __init__(self, sizes):
+    def __init__(self, sizes, activation='sigmoid'):
         """The list ``sizes`` contains the number of neurons in the
         respective layers of the network.  For example, if the list
         was [2, 3, 1] then it would be a three-layer network, with the
@@ -35,14 +35,34 @@ class Network(object):
         ever used in computing the outputs from later layers."""
         self.num_layers = len(sizes)
         self.sizes = sizes
-        self.biases = [np.random.randn(y, 1) for y in sizes[1:]]
-        self.weights = [np.random.randn(y, x)
+        self.biases = [[random.gauss(0, 1) for _ in range(y)] for y in sizes[1:]]
+        self.weights = [[[random.gauss(0, 1) for _ in range(x)] for _ in range(y)]
                         for x, y in zip(sizes[:-1], sizes[1:])]
+        
+    # Select activation functions
+        self.activation_str = activation
+        if activation == 'sigmoid':
+            self.activation = hlp.sigmoid
+            self.activation_prime = hlp.sigmoid_prime
+        elif activation == 'relu':
+            self.activation = hlp.relu
+            self.activation_prime = hlp.relu_prime
+        elif activation == 'leaky_relu':
+            self.activation = hlp.leaky_relu
+            self.activation_prime = hlp.leaky_relu_prime
+        elif activation == 'tanh':
+            self.activation = hlp.tanh
+            self.activation_prime = hlp.tanh_prime
+        else:
+            raise ValueError("Unsupported activation function!")
+
+
+
 
     def feedforward(self, a):
         """Return the output of the network if ``a`` is input."""
         for b, w in zip(self.biases, self.weights):
-            a = sigmoid(np.dot(w, a)+b)
+            a = [self.activation(hlp.dot(w_row, a) + bias) for w_row, bias in zip(w, b)]
         return a
 
     def SGD(self, training_data, epochs, mini_batch_size, eta,
