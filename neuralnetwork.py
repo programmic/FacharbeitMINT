@@ -96,25 +96,25 @@ class Network(object):
             if test_data:
                 accuracy = self.evaluate(test_data)
                 accuracies.append(accuracy / n_test * 100)  # Store accuracy
-                print(f"Epoch {j}: {accuracy} / {n_test} - Accuracy: {accuracies[-1]:.2f}%")
+                print(f"\nEpoch {j}: {accuracy} / {n_test} - Accuracy: {accuracies[-1]:.2f}%")
             else:
                 print(f"Epoch {j} complete")
 
             # Calculate and store the loss for the current epoch
             total_loss = 0  # Initialize total_loss
-            print(f"\rCalculating loss: 000%   {hlp.progress(0, 20)}")
+            print(f"Calculating loss: 000%   {hlp.progress(0, 20)}",end="")
             for i, (x, y) in enumerate(training_data):
                 output = self.feedforward(x)  # Get the network output for input x
                 loss = np.linalg.norm(np.array(output) - np.array(y)) ** 2  # Calculate loss for this instance
                 total_loss += loss  # Accumulate loss
                 progress = i / len(training_data)
-                print(f"\rCalculating loss: {hlp.lenformat(round(progress), 3, ' ', 'front')}%   {hlp.progress(progress/100, 20)}", end="")
+                print(f"\rCalculating loss: {hlp.lenformat(round(progress), 3, ' ', 'front')}%   {hlp.progress(progress, 20)}", end="")
             print()
 
             # Average the total loss by the number of samples
             total_loss /= n
             losses.append(total_loss)  # Store loss
-            print(f"Epoch {j} Loss: {total_loss}")
+            print(f">  Epoch {j} Loss: {total_loss}\n")
             cnt+=1
 
         if return_metrics:
@@ -173,14 +173,14 @@ class Network(object):
         network's output is assumed to be the index of whichever
         neuron in the final layer has the highest activation."""
         test_results = []
-        print("Evaluating:   0%")
+        print("Evaluating:   0%", end="")
         for i, (x, y) in enumerate(test_data):
             output = self.feedforward(x)
             predicted_label = np.argmax(output)  # Get the index of the highest score
             true_label = np.argmax(y) if isinstance(y, list) else y  # Handle one-hot encoding
             test_results.append((predicted_label, true_label))
             progress = i/len(test_data)
-            print(f"\rEvaluating: {hlp.lenformat(round(progress), 3, ' ', 'front')}%   {hlp.progress(progress/100, 20)}", end="")
+            print(f"\rEvaluating: {hlp.lenformat(round(progress*100)/100, 6, ' ', 'front')}%   {hlp.progress(progress, 20)}", end="")
         return sum(int(predicted == true) for (predicted, true) in test_results)
 
 

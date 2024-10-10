@@ -329,6 +329,7 @@ def vec3angleRad(vector1, vector2):
     
     return angle_radians
 
+@jit
 def sigmoid(z):
     """The sigmoid function."""
     return 1 / ( 1 + exp( -z ) )
