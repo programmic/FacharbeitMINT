@@ -61,8 +61,12 @@ class Network(object):
 
     def feedforward(self, a):
         """Return the output of the network if ``a`` is input."""
-        for b, w in zip(self.biases, self.weights):
+        for i, (b, w) in enumerate(zip(self.biases, self.weights)):
             a = [self.activation(hlp.dot(w_row, a) + bias) for w_row, bias in zip(w, b)]
+
+
+            progress = (i + 1) / len(self.biases) * 100
+
         return a
 
     
@@ -74,14 +78,20 @@ class Network(object):
         accuracies = []
         losses = []
         
+        print(f"epochs:{epochs}\nmini_batch_size:{mini_batch_size}\neta:{eta}")
+
+        cnt = 1
         for j in range(epochs):
             random.shuffle(training_data)
             mini_batches = [
-                training_data[k:k + mini_batch_size]
-                for k in range(0, n, mini_batch_size)]
+                training_data[k:k + mini_batch_size] for k in range(0, n, mini_batch_size)]
             
-            for mini_batch in mini_batches:
+
+            print(f"Epoch 1/{epochs}: 000%   [--------------------]", end="")
+            for number, mini_batch in enumerate(mini_batches):
                 self.update_mini_batch(mini_batch, eta)
+                print(f"\rEpoch {cnt}/{epochs}: {hlp.lenformat(round(number/len(mini_batches)*100), 3, ' ', 'front')}%    {hlp.progress(number/len(mini_batches), 20)}", end="")
+            print()
 
             if test_data:
                 accuracy = self.evaluate(test_data)
@@ -91,9 +101,21 @@ class Network(object):
                 print(f"Epoch {j} complete")
 
             # Calculate and store the loss for the current epoch
-            total_loss = sum([np.linalg.norm(np.array(self.feedforward(x)) - np.array(y))**2 for (x, y) in training_data]) / n
+            total_loss = 0  # Initialize total_loss
+            print(f"\rCalculating loss: 000%   {hlp.progress(0, 20)}")
+            for i, (x, y) in enumerate(training_data):
+                output = self.feedforward(x)  # Get the network output for input x
+                loss = np.linalg.norm(np.array(output) - np.array(y)) ** 2  # Calculate loss for this instance
+                total_loss += loss  # Accumulate loss
+                progress = i / len(training_data)
+                print(f"\rCalculating loss: {hlp.lenformat(round(progress), 3, ' ', 'front')}%   {hlp.progress(progress/100, 20)}", end="")
+            print()
+
+            # Average the total loss by the number of samples
+            total_loss /= n
             losses.append(total_loss)  # Store loss
             print(f"Epoch {j} Loss: {total_loss}")
+            cnt+=1
 
         if return_metrics:
             return accuracies, losses  # Return the accuracy and loss metrics
@@ -110,11 +132,12 @@ class Network(object):
             nabla_b = [hlp.vector_add(nb, dnb) for nb, dnb in zip(nabla_b, delta_nabla_b)]
             nabla_w = [[hlp.vector_add(nw_row, dnw_row) for nw_row, dnw_row in zip(nw_layer, dnw_layer)]
                        for nw_layer, dnw_layer in zip(nabla_w, delta_nabla_w)]
-        self.weights = [[hlp.vector_subtract(w_row, hlp.scalar_vector_mult(eta / len(mini_batch), nw_row))
-                         for w_row, nw_row in zip(w_layer, nw_layer)]
-                        for w_layer, nw_layer in zip(self.weights, nabla_w)]
-        self.biases = [hlp.vector_subtract(b, hlp.scalar_vector_mult(eta / len(mini_batch), nb))
-                       for b, nb in zip(self.biases, nabla_b)]
+            
+            
+        self.weights = [[hlp.vector_subtract(w_row, hlp.scalar_vector_mult(eta / len(mini_batch), nw_row)) for w_row, nw_row in zip(w_layer, nw_layer)]
+                for w_layer, nw_layer in zip(self.weights, nabla_w)]
+
+        self.biases = [hlp.vector_subtract(b, hlp.scalar_vector_mult(eta / len(mini_batch), nb)) for b, nb in zip(self.biases, nabla_b)]
 
     def backprop(self, x, y):
         """Return a tuple ``(nabla_b, nabla_w)`` representing the
@@ -150,17 +173,26 @@ class Network(object):
         network's output is assumed to be the index of whichever
         neuron in the final layer has the highest activation."""
         test_results = []
-        for (x, y) in test_data:
+        print("Evaluating:   0%")
+        for i, (x, y) in enumerate(test_data):
             output = self.feedforward(x)
             predicted_label = np.argmax(output)  # Get the index of the highest score
             true_label = np.argmax(y) if isinstance(y, list) else y  # Handle one-hot encoding
             test_results.append((predicted_label, true_label))
+            progress = i/len(test_data)
+            print(f"\rEvaluating: {hlp.lenformat(round(progress), 3, ' ', 'front')}%   {hlp.progress(progress/100, 20)}", end="")
         return sum(int(predicted == true) for (predicted, true) in test_results)
 
 
     def cost_derivative(self, output_activations, y):
     # Assuming y is a list with a single element, convert it to a scalar value
-        return (output_activations - y[0])
+        if type(output_activations) is list:
+            return (output_activations - y[0])
+        else:
+            try:
+                return (output_activations - y)
+            except ValueError:
+                raise ValueError("Invalid")
 
 
 def test_activations(training_data, test_data, sizes, epochs, mini_batch_size, eta):

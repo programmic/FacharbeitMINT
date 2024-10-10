@@ -2,6 +2,7 @@ import colors as colors
 from colorsys import hsv_to_rgb
 from math import sqrt, acos, exp
 import pandas as pd
+from numba import jit, njit
 
 clear = "\033c"
 
@@ -64,6 +65,12 @@ def lenformat( pInput: str | int, pDesiredLength: int, character: str = " ", pla
     elif place == "front":
         return str(character * int(int(pDesiredLength) - len(str(pInput)))) + str(str(pInput))
     
+def progress(percentage: float | int, length: int, empty: str = "-", filled: str = "#", braces: str = "[]"):
+    if braces == " " or braces == "": braces = "  "
+    filled_length = int(length * percentage)
+
+    return(  braces[ 0 ] + ( filled * filled_length ) + ( empty * ( length - filled_length -1 ) ) + braces[1])
+    
 def clearTerminal() -> None:
     """
     clears the Terminal
@@ -95,6 +102,18 @@ def makeMatrix(
                 for n in range(pZ):
                     ret[i][j].append([])  
     return ret
+
+def transpose(matrix):
+    """
+    Transposes the given matrix (rows become columns and vice versa).
+
+    Parameters:
+    matrix (list of lists): The matrix to be transposed.
+
+    Returns:
+    list of lists: The transposed matrix.
+    """
+    return [list(row) for row in zip(*matrix)]
 
 def HSVpercentToRGB(
         H: float, 
@@ -152,6 +171,32 @@ def normalizeVector(vector: tuple) -> tuple:
     # Divide each component by the magnitude
     return [v / magnitude for v in vector]
 
+def vector_add(v1, v2):
+    """
+    Adds two vectors element-wise.
+
+    Parameters:
+    v1 (list): The first vector.
+    v2 (list): The second vector.
+
+    Returns:
+    list: The resulting vector after addition.
+    """
+    return [a + b for a, b in zip(v1, v2)]
+
+def vector_subtract(v1, v2):
+    """
+    Subtracts the second vector from the first vector element-wise.
+
+    Parameters:
+    v1 (list): The first vector.
+    v2 (list): The second vector.
+
+    Returns:
+    list: The resulting vector after subtraction.
+    """
+    return [a - b for a, b in zip(v1, v2)]
+
 def intersectsLineVec(
         p1 :  tuple [ float, float ],
         p2 :  tuple [ float, float ],
@@ -159,6 +204,9 @@ def intersectsLineVec(
         dir : tuple [ float, float ]
         ) -> bool:
     pass
+
+def dot(v1, v2):
+    return sum(x * y for x, y in zip(v1, v2))
 
 def dot2(vector1, vector2):
     """
@@ -191,6 +239,19 @@ def dot3(vector1, vector2):
         raise ValueError("Both vectors must have exactly 3 elements.")
     
     return vector1[0] * vector2[0] + vector1[1] * vector2[1] + vector1[2] * vector2[2]
+
+def scalar_vector_mult(scalar, vector):
+    """
+    Multiplies a scalar with each element of the vector.
+
+    Parameters:
+    scalar (float or int): The scalar value.
+    vector (list or array): The vector with which the scalar is multiplied.
+
+    Returns:
+    list: A new vector resulting from the scalar-vector multiplication.
+    """
+    return [scalar * element for element in vector]
 
 def mag3(vector):
     """
