@@ -85,7 +85,8 @@ class Network(object):
                 self.update_mini_batch(mini_batch, eta)
             if test_data:
                 accuracy = self.evaluate(test_data)
-                print(f"Epoch {j}: {accuracy} / {n_test}")
+                print(f"Epoch {j}: {accuracy} / {n_test} - Accuracy: {accuracy / n_test * 100:.2f}%")
+
             else:
                 print(f"Epoch {j} complete")
 
@@ -144,9 +145,14 @@ class Network(object):
         network outputs the correct result. Note that the neural
         network's output is assumed to be the index of whichever
         neuron in the final layer has the highest activation."""
-        test_results = [(self.feedforward(x).index(max(self.feedforward(x))), y)
-                        for (x, y) in test_data]
-        return sum(int(x == y) for (x, y) in test_results)
+        test_results = []
+        for (x, y) in test_data:
+            output = self.feedforward(x)
+            predicted_label = np.argmax(output)  # Get the index of the highest score
+            true_label = np.argmax(y) if isinstance(y, list) else y  # Handle one-hot encoding
+            test_results.append((predicted_label, true_label))
+        return sum(int(predicted == true) for (predicted, true) in test_results)
+
 
     def cost_derivative(self, output_activations, y):
     # Assuming y is a list with a single element, convert it to a scalar value
@@ -162,12 +168,15 @@ def test_activations(training_data, test_data, sizes, epochs, mini_batch_size, e
 
 
 # Load CSV Data
+print("loading data...")
 training_data = hlp.load_csv_data('input/digit-recognizer/train.csv')
 test_data = hlp.load_csv_data('input/digit-recognizer/test.csv')
 
 # Initialize the network (adjust size based on your CSV file's features)
+print("initialize network...")
 net = Network([len(training_data[0][0]), 3, 1])
 
 # Example usage to test different activation functions
-net = Network([2, 3, 1], activation='sigmoid')  # Can use 'relu', 'tanh', or 'leaky_relu'
-net.SGD(training_data, epochs=128, mini_batch_size=10, eta=3.0, test_data=test_data)
+print("train network...")
+net = Network([2, 3, 2, 1], activation='sigmoid')  # Can use 'relu', 'tanh', or 'leaky_relu'
+net.SGD(training_data, epochs=256, mini_batch_size=32, eta=0.01, test_data=test_data)

@@ -2,6 +2,7 @@ import colors as colors
 from colorsys import hsv_to_rgb
 from math import sqrt, acos, exp
 import csv
+from numba import njit
 
 clear = "\033c"
 
@@ -317,3 +318,5 @@ def tanh(z):
 def tanh_prime(z):
     """Derivative of tanh function"""
     return 1.0 -  tanh(z) ** 2
+
+print (numba.__verion__)
