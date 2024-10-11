@@ -3,6 +3,7 @@ from colorsys import hsv_to_rgb
 from math import sqrt, acos, exp
 import pandas as pd
 from numba import jit, njit
+import numpy as np
 
 clear = "\033c"
 
@@ -337,3 +338,33 @@ def sigmoid(z):
 def sigmoid_prime(z):
     """Derivative of the sigmoid function."""
     return sigmoid ( z ) * ( 1 - sigmoid ( z ) )
+
+@jit
+def relu(x):
+    """ReLU activation function."""
+    return np.maximum(0, x)
+
+@jit
+def relu_prime(x):
+    """Derivative of the ReLU function."""
+    return np.where(x > 0, 1, 0)
+
+@jit
+def tanh(x):
+    """Tanh activation function."""
+    return np.tanh(x)
+
+@jit
+def tanh_prime(x):
+    """Derivative of the Tanh function."""
+    return 1 - np.tanh(x) ** 2
+
+@jit
+def leaky_relu(x, alpha=0.01):
+    """Leaky ReLU activation function."""
+    return np.where(x > 0, x, alpha * x)
+
+@jit
+def leaky_relu_prime(x, alpha=0.01):
+    """Derivative of the Leaky ReLU function."""
+    return np.where(x > 0, 1, alpha)
