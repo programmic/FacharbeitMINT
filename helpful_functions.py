@@ -4,8 +4,30 @@ from math import sqrt, acos, exp
 import pandas as pd
 from numba import jit, njit
 import numpy as np
+from functools import wraps
+import time
 
 clear = "\033c"
+
+def time_it(func):
+    """
+    Decorator that measures the runtime of the function it decorates.
+
+    Args:
+        func: The function to be decorated.
+
+    Returns:
+        The wrapper function that measures and prints the execution time.
+    """
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        start_time = time.time()  # Record the start time
+        result = func(*args, **kwargs)  # Call the original function
+        end_time = time.time()  # Record the end time
+        duration = end_time - start_time  # Calculate the duration
+        print(f"Function '{func.__name__}' took {duration:.4f} seconds to complete.")
+        return result  # Return the original function's result
+    return wrapper
 
 def readFile(pName: str, pNr: int, extension: str = ".txt") -> list[str]:
     """
@@ -368,3 +390,18 @@ def leaky_relu(x, alpha=0.01):
 def leaky_relu_prime(x, alpha=0.01):
     """Derivative of the Leaky ReLU function."""
     return np.where(x > 0, 1, alpha)
+
+
+def timeFormat(seconds: int | float) -> str:
+    # Extract days, hours, minutes, seconds, and milliseconds
+    days = int(seconds // 86400)
+    seconds %= 86400
+    hours = int(seconds // 3600)
+    seconds %= 3600
+    minutes = int(seconds // 60)
+    seconds %= 60
+    milliseconds = int((seconds - int(seconds)) * 1000)
+    seconds = int(seconds)
+
+    # Format the output as dd:hh:mm:ss:msms
+    return f"{days:02}d {hours:02}h {minutes:02}m {seconds:02}s {milliseconds:03}ms"

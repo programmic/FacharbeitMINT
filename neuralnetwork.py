@@ -18,6 +18,7 @@ import matplotlib as plt
 
 # My help libarys
 import helpful_functions as hlp # usefull functions as dot products, or different activation functions
+from helpful_functions import time_it
 import colors # colors for terminal output
 
 class Network(object):
@@ -86,12 +87,16 @@ class Network(object):
             mini_batches = [
                 training_data[k:k + mini_batch_size] for k in range(0, n, mini_batch_size)]
             
-
-            print(f"Epoch 1/{epochs}: 000%   [--------------------]", end="")
+            start_time = hlp.time.time()  # Record the start time
+            print(f"Epoch 1/{epochs}: 000%   [{'-'*50}]", end="")
             for number, mini_batch in enumerate(mini_batches):
                 self.update_mini_batch(mini_batch, eta)
-                print(f"\rEpoch {cnt}/{epochs}: {hlp.lenformat(round(number/len(mini_batches)*100), 3, ' ', 'front')}%    {hlp.progress(number/len(mini_batches), 20)}", end="")
+                print(f"\rEpoch {cnt}/{epochs}: {hlp.lenformat(round(number/len(mini_batches)*100), 3, ' ', 'front')}%    {hlp.progress(number/len(mini_batches), 50)}", end="")
+            end_time = hlp.time.time()  # Record the end time
             print()
+            duration = end_time - start_time  # Calculate the duration
+            print(f"Proceesing mini batch epoch {cnt} complete after {duration:.4f}")
+            
 
             if test_data:
                 accuracy = self.evaluate(test_data)
@@ -102,19 +107,19 @@ class Network(object):
 
             # Calculate and store the loss for the current epoch
             total_loss = 0  # Initialize total_loss
-            print(f"Calculating loss: 000%   {hlp.progress(0, 20)}",end="")
+            print(f"Calculating loss: 000%   {hlp.progress(0, 50)}",end="")
             for i, (x, y) in enumerate(training_data):
                 output = self.feedforward(x)  # Get the network output for input x
                 loss = np.linalg.norm(np.array(output) - np.array(y)) ** 2  # Calculate loss for this instance
                 total_loss += loss  # Accumulate loss
                 progress = i / len(training_data)
-                print(f"\rCalculating loss: {hlp.lenformat(round(progress), 3, ' ', 'front')}%   {hlp.progress(progress, 20)}", end="")
-            print()
+                print(f"\rCalculating loss: {hlp.lenformat(round(progress)*100, 3, ' ', 'front')}%   {hlp.progress(progress, 50)}", end="")
+         
 
             # Average the total loss by the number of samples
             total_loss /= n
             losses.append(total_loss)  # Store loss
-            print(f">  Epoch {j} Loss: {total_loss}\n")
+            print(f"\r>  Epoch {j} Loss: {round(total_loss,6)}{' '*55}\n")
             cnt+=1
 
         if return_metrics:
@@ -180,7 +185,7 @@ class Network(object):
             true_label = np.argmax(y) if isinstance(y, list) else y  # Handle one-hot encoding
             test_results.append((predicted_label, true_label))
             progress = i/len(test_data)
-            print(f"\rEvaluating: {hlp.lenformat(round(progress*100)/100, 6, ' ', 'front')}%   {hlp.progress(progress, 20)}", end="")
+            print(f"\rEvaluating: {hlp.lenformat(round(progress*100), 6, ' ', 'front')}%   {hlp.progress(progress, 50)}", end="")
         return sum(int(predicted == true) for (predicted, true) in test_results)
 
 
@@ -218,9 +223,23 @@ def test_activations(training_data, test_data, sizes, epochs, mini_batch_size, e
     plt.show()
 
 
-# Load CSV Data
-print("loading data...")
-training_data = hlp.load_csv_data('input/digit-recognizer/train.csv')
-test_data = hlp.load_csv_data('input/digit-recognizer/test.csv')
+@time_it
+def loadData():
+    trd = hlp.load_csv_data('input/digit-recognizer/train.csv')
+    ted = hlp.load_csv_data('input/digit-recognizer/test.csv')
+    return trd, ted
 
-test_activations(training_data, test_data, [784,30,10], 32, 32,0.01)
+
+if __name__ == "__main__":
+    hlp.clearTerminal()
+    # Load CSV Data
+    print("loading data...")
+    training_data, test_data = loadData()
+
+    print(f"{colors.green}Started training at {hlp.timeFormat(hlp.time.time())}{colors.clear}")
+    startTime = hlp.time.time()
+
+    test_activations(training_data, test_data, [784,20,10], 16, 16, 0.03)
+    endTime = hlp.time.time()
+    print(f"{colors.green}Completed training in {hlp.timeFormat(endTime - startTime)}{colors.clear}")
+else: print("Successfully loaded 'neuralnetwork.py'")
