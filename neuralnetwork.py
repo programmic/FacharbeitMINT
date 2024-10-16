@@ -18,7 +18,6 @@ import matplotlib as plt
 
 # My help libarys
 import helpful_functions as hlp # usefull functions as dot products, or different activation functions
-from helpful_functions import time_it
 import colors # colors for terminal output
 
 class Network(object):
@@ -80,6 +79,7 @@ class Network(object):
         losses = []
         
         print(f"epochs:{epochs}\nmini_batch_size:{mini_batch_size}\neta:{eta}")
+        print(f"{hlp.colors.green}Beginning training at {hlp.timeFormat(hlp.time.time())}{hlp.colors.clear}")
 
         cnt = 1
         for j in range(epochs):
@@ -211,19 +211,22 @@ def test_activations(training_data, test_data, sizes, epochs, mini_batch_size, e
         results[activation]['accuracy'] = accuracies
         results[activation]['loss'] = losses
 
-    # Plotting the results
-    for activation in activation_functions:
-        plt.plot(range(epochs), results[activation]['accuracy'], label=f'Accuracy ({activation})')
-        plt.plot(range(epochs), results[activation]['loss'], label=f'Loss ({activation})')
+    try:
+        # Plotting the results
+        for activation in activation_functions:
+            plt.plot(range(epochs), results[activation]['accuracy'], label=f'Accuracy ({activation})')
+            plt.plot(range(epochs), results[activation]['loss'], label=f'Loss ({activation})')
 
-    plt.xlabel('Epochs')
-    plt.ylabel('Metrics')
-    plt.title('Activation Function Comparison')
-    plt.legend()
-    plt.show()
+        plt.xlabel('Epochs')
+        plt.ylabel('Metrics')
+        plt.title('Activation Function Comparison')
+        plt.legend()
+        plt.show()
+    except:
+        pass
 
 
-@time_it
+@hlp.time_it
 def loadData():
     trd = hlp.load_csv_data('input/digit-recognizer/train.csv')
     ted = hlp.load_csv_data('input/digit-recognizer/test.csv')
